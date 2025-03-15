@@ -33,6 +33,13 @@ struct TrackingError {
     double hdg = 0;
 };
 
+struct Trajectory {
+    std::vector<State> states;
+    std::vector<Control> controls;
+    std::vector<TrackingError> tracking_errors;
+    std::vector<double> time_vec;
+};
+
 State nextState(const State& current_state, const Control& control, const EgoConfig& config);
 std::vector<State> trajectoryRollout(const State& initial_state, const std::vector<Control>& control_vec, const EgoConfig& config);
 

@@ -5,7 +5,6 @@
 #include <vector>
 
 std::vector<Control> openLoopControl();
-std::tuple<std::vector<State>, std::vector<Control>, std::vector<TrackingError>, std::vector<double>> closedLoopControl(const State&, const State&, const EgoConfig&);
-
+Trajectory closedLoopControl(const State&, const State&, const EgoConfig&);
 
 #endif // CONTROL_H 

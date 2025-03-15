@@ -13,53 +13,55 @@ vector<Control> openLoopControl() {
         control_vec[i].acc = 0;
         control_vec[i].steer = 0;
     }
-
     return control_vec;
 }
 
-tuple<vector<State>, vector<Control>, vector<TrackingError>, vector<double>> closedLoopControl(const State& start_state, const State& desired_state, const EgoConfig& config) {
-    vector<State> trajectory;
-    vector<Control> control_vec;
-    vector<TrackingError> tracking_errors;
+Trajectory closedLoopControl(const State& start_state, const State& desired_state, const EgoConfig& config) {
+    vector<State> state_t;
+    vector<Control> control_t;
+    vector<TrackingError> err_t;
     vector<double> time_vec;  // New vector to store time data
 
-    State tmp_state;
-    Control ctrl;
-    TrackingError err;
-    double current_time = 0.0;  // Initialize time to 0
+    State state_current = start_state;
+    Control ctrl_current;
+    TrackingError err_current;
+    double time_current = 0.0;  // Initialize time to 0
 
+    // LQR Controller parameters
     double k1 = 0.44;
     double k2 = 1.04;
+
+    // Reference steering angle, assume zero curvature
     double steer_ref = 0;
 
-    double y_err = start_state.y - desired_state.y;
-    double x_err = start_state.x - desired_state.x;
-    err.hdg = start_state.hdg - desired_state.hdg;
-    err.lat = y_err * cos(desired_state.hdg) - x_err * sin(desired_state.hdg);
-    err.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
+    // Initial tracking error, needed for loop termination
+    double y_err = state_current.y - desired_state.y;
+    double x_err = state_current.x - desired_state.x;
+    err_current.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
 
-    while (abs(err.lng) > 1.0 && current_time < config.duration) {
+    while (abs(err_current.lng) > 1.0 && time_current < config.duration) {
+        // Update tracking error
+        y_err = state_current.y - desired_state.y;
+        x_err = state_current.x - desired_state.x;
+        err_current.hdg = state_current.hdg - desired_state.hdg;
+        err_current.lat = y_err * cos(desired_state.hdg) - x_err * sin(desired_state.hdg);
+        err_current.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
+        err_t.push_back(err_current);
 
-        ctrl.steer = -config.wheelbsae * (k1 * err.lat + k2 * err.hdg) * cos(steer_ref) * cos(steer_ref);
-        ctrl.steer = max(min(ctrl.steer, config.steer_max), config.steer_min);
-        ctrl.acc = sign(err.lng)? config.acc_max : config.acc_min;
+        // Compute control
+        ctrl_current.steer = -config.wheelbsae * (k1 * err_current.lat + k2 * err_current.hdg) * cos(steer_ref) * cos(steer_ref);
+        ctrl_current.steer = max(min(ctrl_current.steer, config.steer_max), config.steer_min);
+        ctrl_current.acc = sign(err_current.lng)? config.acc_max : config.acc_min;
+        control_t.push_back(ctrl_current);
 
-        tmp_state = nextState(tmp_state, ctrl, config);
-
-        trajectory.push_back(tmp_state);
-        tracking_errors.push_back(err);
-        control_vec.push_back(ctrl);
-        time_vec.push_back(current_time);  // Store the current time
+        // Update state
+        state_current = nextState(state_current, ctrl_current, config);
+        state_t.push_back(state_current);
         
-        // Update time for next iteration
-        current_time += config.dt;
-        
-        y_err = tmp_state.y - desired_state.y;
-        x_err = tmp_state.x - desired_state.x;
-        err.hdg = tmp_state.hdg - desired_state.hdg;
-        err.lat = y_err * cos(desired_state.hdg) - x_err * sin(desired_state.hdg);
-        err.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
+        // Update time
+        time_current += config.dt;
+        time_vec.push_back(time_current);
     }
 
-    return make_tuple(trajectory, control_vec, tracking_errors, time_vec);
+    return Trajectory{state_t, control_t, err_t, time_vec};
 }
