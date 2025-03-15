@@ -9,10 +9,11 @@ using namespace std;
 
 int main() {
     EgoConfig ego_config;
+    ego_config.duration = 10.0;
     
     State start_state;
     start_state.x = 0;
-    start_state.y = 0;
+    start_state.y = 30;
     start_state.hdg = 0;
     start_state.vel = 0;
     
@@ -30,13 +31,14 @@ int main() {
     vector<State> trajectory = get<0>(result);
     vector<Control> control_vec = get<1>(result);
     vector<TrackingError> tracking_errors = get<2>(result);
+    vector<double> time_vec = get<3>(result);
 
     // Print trajectory and errors to console
-    printTrajectoryError(trajectory, control_vec, tracking_errors);
+    printTrajectory(trajectory, control_vec, tracking_errors, time_vec);
     
-    // Save trajectory with errors to a file in the docs folder
-    string outputFilenameWithErrors = "docs/trajectory_with_errors.txt";
-    saveTrajectoryWithErrorToFile(trajectory, control_vec, tracking_errors, outputFilenameWithErrors);
+    // Save trajectory to a file in the docs folder
+    string outputFilename = "docs/trajectory.txt";
+    saveTrajectoryToFile(trajectory, control_vec, tracking_errors, time_vec, outputFilename);
     
     return 0;
 }

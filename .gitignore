@@ -1,0 +1,74 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.userprefs
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Python virtual environment
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.env
+.venv
+ENV/
+
+# Generated data files
+*.csv
+plot_data_*.csv
+plot_commands.log
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# Dependency directories
+lib/
+libs/
+external/
+
+# Generated documentation
+docs/trajectory.txt
+docs/*.png
+
+# Logs
+*.log
+logs/
+
+# Other
+.cache/ 

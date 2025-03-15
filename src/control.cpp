@@ -17,14 +17,16 @@ vector<Control> openLoopControl() {
     return control_vec;
 }
 
-tuple<vector<State>, vector<Control>, vector<TrackingError>> closedLoopControl(const State& start_state, const State& desired_state, const EgoConfig& config) {
+tuple<vector<State>, vector<Control>, vector<TrackingError>, vector<double>> closedLoopControl(const State& start_state, const State& desired_state, const EgoConfig& config) {
     vector<State> trajectory;
     vector<Control> control_vec;
     vector<TrackingError> tracking_errors;
+    vector<double> time_vec;  // New vector to store time data
 
     State tmp_state;
     Control ctrl;
     TrackingError err;
+    double current_time = 0.0;  // Initialize time to 0
 
     double k1 = 0.44;
     double k2 = 1.04;
@@ -36,10 +38,7 @@ tuple<vector<State>, vector<Control>, vector<TrackingError>> closedLoopControl(c
     err.lat = y_err * cos(desired_state.hdg) - x_err * sin(desired_state.hdg);
     err.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
 
-    int counter = 0;
-    int max_iter = (int) (60.0 / config.dt);
-    while (abs(err.lng) > 1.0 && counter < max_iter) {
-        counter++;
+    while (abs(err.lng) > 1.0 && current_time < config.duration) {
 
         ctrl.steer = -config.wheelbsae * (k1 * err.lat + k2 * err.hdg) * cos(steer_ref) * cos(steer_ref);
         ctrl.steer = max(min(ctrl.steer, config.steer_max), config.steer_min);
@@ -50,6 +49,11 @@ tuple<vector<State>, vector<Control>, vector<TrackingError>> closedLoopControl(c
         trajectory.push_back(tmp_state);
         tracking_errors.push_back(err);
         control_vec.push_back(ctrl);
+        time_vec.push_back(current_time);  // Store the current time
+        
+        // Update time for next iteration
+        current_time += config.dt;
+        
         y_err = tmp_state.y - desired_state.y;
         x_err = tmp_state.x - desired_state.x;
         err.hdg = tmp_state.hdg - desired_state.hdg;
@@ -57,5 +61,5 @@ tuple<vector<State>, vector<Control>, vector<TrackingError>> closedLoopControl(c
         err.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
     }
 
-    return make_tuple(trajectory, control_vec, tracking_errors);
+    return make_tuple(trajectory, control_vec, tracking_errors, time_vec);
 }

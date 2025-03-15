@@ -24,6 +24,7 @@ struct EgoConfig {
     double steer_max = 0.5;
     double steer_min = -0.5;
     double dt = 0.1;
+    double duration = 20.0; // sim
 };
 
 struct TrackingError {

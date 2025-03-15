@@ -24,18 +24,13 @@ string FormatWithFixedDigits(double value) {
     return ss.str();
 }
 
-void printTrajectory(const vector<State>& trajectory) {
-    for (const auto& state : trajectory) {
-        cout << "x: " << state.x << ", y: " << state.y << ", hdg: " << state.hdg << ", vel: " << state.vel << endl;
-    }
-}
-
-void printTrajectoryError(const vector<State>& trajectory, 
-                         const vector<Control>& controls,
-                         const vector<TrackingError>& errors) {
+void printTrajectory(const vector<State>& trajectory, 
+                    const vector<Control>& controls,
+                    const vector<TrackingError>& errors,
+                    const vector<double>& time_vec) {
     // Check if all vectors have the same size
-    if (trajectory.size() != errors.size() || trajectory.size() != controls.size()) {
-        cerr << "Error: Trajectory, controls, and error vectors have different sizes." << endl;
+    if (trajectory.size() != errors.size() || trajectory.size() != controls.size() || trajectory.size() != time_vec.size()) {
+        cerr << "Error: Trajectory, controls, error, and time vectors have different sizes." << endl;
         return;
     }
     
@@ -44,6 +39,7 @@ void printTrajectoryError(const vector<State>& trajectory,
     
     // Print header
     cout << left 
+         << setw(colWidth) << "time:" 
          << setw(colWidth) << "x:" 
          << setw(colWidth) << "y:" 
          << setw(colWidth) << "hdg:" 
@@ -54,16 +50,18 @@ void printTrajectoryError(const vector<State>& trajectory,
          << setw(colWidth) << "lng:" 
          << setw(colWidth) << "hdg_err:" << endl;
     
-    cout << string(colWidth * 9 - 3, '-') << endl;  // Separator line adjusted for new width
+    cout << string(colWidth * 10 - 3, '-') << endl;  // Separator line adjusted for new width
     
     // Print each step in a single line
     for (size_t i = 0; i < trajectory.size(); ++i) {
         const auto& state = trajectory[i];
         const auto& control = controls[i];
         const auto& error = errors[i];
+        const auto& time = time_vec[i];
         
         cout << left 
              << fixed << setprecision(2)
+             << setw(colWidth) << time
              << setw(colWidth) << state.x 
              << setw(colWidth) << state.y 
              << setw(colWidth) << state.hdg 
@@ -76,44 +74,14 @@ void printTrajectoryError(const vector<State>& trajectory,
     }
 }
 
-void saveTrajectoryToFile(const vector<State>& trajectory, const string& filename) {
-    ofstream outFile(filename);
-    
-    if (!outFile.is_open()) {
-        cerr << "Error: Could not open file " << filename << " for writing." << endl;
-        return;
-    }
-    
-    // Set column widths for better readability
-    const int colWidth = 9;  // Reduced from 15 to 9 to match other functions
-    
-    // Write header with proper formatting
-    outFile << left
-            << setw(colWidth) << "x"
-            << setw(colWidth) << "y"
-            << setw(colWidth) << "hdg"
-            << setw(colWidth) << "vel" << endl;
-    
-    // Write data with consistent column widths
-    for (const auto& state : trajectory) {
-        outFile << left
-                << setw(colWidth) << FormatWithFixedDigits(state.x)
-                << setw(colWidth) << FormatWithFixedDigits(state.y)
-                << setw(colWidth) << FormatWithFixedDigits(state.hdg)
-                << setw(colWidth) << FormatWithFixedDigits(state.vel) << endl;
-    }
-    
-    outFile.close();
-    cout << "Trajectory saved to " << filename << endl;
-}
-
-void saveTrajectoryWithErrorToFile(const vector<State>& trajectory, 
-                                  const vector<Control>& controls,
-                                  const vector<TrackingError>& errors, 
-                                  const string& filename) {
+void saveTrajectoryToFile(const vector<State>& trajectory, 
+                         const vector<Control>& controls,
+                         const vector<TrackingError>& errors,
+                         const vector<double>& time_vec,
+                         const string& filename) {
     // Check if all vectors have the same size
-    if (trajectory.size() != errors.size() || trajectory.size() != controls.size()) {
-        cerr << "Error: Trajectory, controls, and error vectors have different sizes." << endl;
+    if (trajectory.size() != errors.size() || trajectory.size() != controls.size() || trajectory.size() != time_vec.size()) {
+        cerr << "Error: Trajectory, controls, error, and time vectors have different sizes." << endl;
         return;
     }
     
@@ -129,6 +97,7 @@ void saveTrajectoryWithErrorToFile(const vector<State>& trajectory,
     
     // Write header with proper formatting
     outFile << left
+            << setw(colWidth) << "time"
             << setw(colWidth) << "x"
             << setw(colWidth) << "y"
             << setw(colWidth) << "hdg"
@@ -144,9 +113,13 @@ void saveTrajectoryWithErrorToFile(const vector<State>& trajectory,
         const auto& state = trajectory[i];
         const auto& control = controls[i];
         const auto& error = errors[i];
+        const auto& time = time_vec[i];
         
         // Format each value to have exactly 4 digits total
         outFile << left << fixed;
+        
+        // Format time value
+        outFile << setw(colWidth) << FormatWithFixedDigits(time);
         
         // Format state values
         outFile << setw(colWidth) << FormatWithFixedDigits(state.x)
@@ -165,6 +138,6 @@ void saveTrajectoryWithErrorToFile(const vector<State>& trajectory,
     }
     
     outFile.close();
-    cout << "Trajectory with controls and errors saved to " << filename << endl;
+    cout << "Trajectory saved to " << filename << endl;
 }
 
