@@ -3,6 +3,11 @@
 
 #include <vector>
 
+struct Position{
+    double x;
+    double y;
+};
+
 struct State {
     double x;
     double y;

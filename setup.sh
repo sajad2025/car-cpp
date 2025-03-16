@@ -13,7 +13,7 @@ fi
 echo "Installing required packages..."
 source venv/bin/activate
 pip install --upgrade pip
-pip install matplotlib numpy
+pip install -r requirements.txt
 
 echo ""
 echo "Setup complete!"
@@ -22,7 +22,8 @@ echo "To activate the virtual environment in your current shell, run:"
 echo ""
 echo "  source venv/bin/activate"
 echo ""
-echo "After activation, you can run the plotting script with:"
+echo "After activation, you can run the scripts with:"
+echo "  python lqr.py"
 echo "  python plots.py"
 echo ""
 echo "To deactivate the virtual environment when finished, run:"
@@ -42,6 +43,7 @@ else
     echo "Activating virtual environment..."
     # We're already in the activated environment from above
     echo "Virtual environment is now active. You can run:"
+    echo "  python lqr.py"
     echo "  python plots.py"
     echo ""
 fi 

@@ -1,18 +1,29 @@
 #include "control.h"
-#include "vehicle_model.h"
 #include "utils.h"
 #include <cmath>
-using namespace std;
 
-vector<Control> openLoopControl() {
-    int n = 100;
-    vector<Control> control_vec(n);
+// vector<Control> openLoopControl() {
+//     int n = 100;
+//     vector<Control> control_vec(n);
 
-    for (int i = 0; i < n; i++) {
-        control_vec[i].acc = 0;
-        control_vec[i].steer = 0;
-    }
-    return control_vec;
+//     for (int i = 0; i < n; i++) {
+//         control_vec[i].acc = 0;
+//         control_vec[i].steer = 0;
+//     }
+//     return control_vec;
+// }
+
+Position updateReference(double x, double y, double shift_lat, double shift_lon, double h_r) {
+    // Cramer's rule
+    // note: det = 1 = cos(h_r) * cos(h_r) + sin(h_r) * sin(h_r)
+    double x_bar = (-shift_lat * sin(h_r) - shift_lon * cos(h_r)) / 1;
+    double y_bar = (shift_lat * cos(h_r) - shift_lon * sin(h_r)) / 1;
+    
+    // Solve for x_r and y_r using:
+    double x_r = x - x_bar;
+    double y_r = y - y_bar;
+    
+    return {x_r, y_r};
 }
 
 Trajectory closedLoopControl(const State& start_state, const State& desired_state, const EgoConfig& config) {
@@ -33,18 +44,37 @@ Trajectory closedLoopControl(const State& start_state, const State& desired_stat
     // Reference steering angle, assume zero curvature
     double steer_ref = 0;
 
+    // local desired state to be modified
+    State desired_state_local = desired_state;
+
     // Initial tracking error, needed for loop termination
-    double y_err = state_current.y - desired_state.y;
-    double x_err = state_current.x - desired_state.x;
-    err_current.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
+    double y_err = state_current.y - desired_state_local.y;
+    double x_err = state_current.x - desired_state_local.x;
+    err_current.lng = -y_err * sin(desired_state_local.hdg) - x_err * cos(desired_state_local.hdg);
+
+    bool ref_mod = false;
 
     while (abs(err_current.lng) > 1.0 && time_current < config.duration) {
+
+        // test update reference, modify desired state
+        if (time_current > 10 && !ref_mod) {
+            ref_mod = true; // only modify reference once
+
+            double shift_lat = 4;               // shift in lateral direction by 4m
+            double shift_lon = err_current.lng; // keep shift in longitudinal direction same as tracking error
+            double h_r = desired_state.hdg;     // keep ref heading fixed
+
+            Position ref = updateReference(state_current.x, state_current.y, shift_lat, shift_lon, h_r);
+            desired_state_local.x = ref.x;
+            desired_state_local.y = ref.y;
+        }
+
         // Update tracking error
-        y_err = state_current.y - desired_state.y;
-        x_err = state_current.x - desired_state.x;
-        err_current.hdg = state_current.hdg - desired_state.hdg;
-        err_current.lat = y_err * cos(desired_state.hdg) - x_err * sin(desired_state.hdg);
-        err_current.lng = -y_err * sin(desired_state.hdg) - x_err * cos(desired_state.hdg);
+        y_err = state_current.y - desired_state_local.y;
+        x_err = state_current.x - desired_state_local.x;
+        err_current.hdg = state_current.hdg - desired_state_local.hdg;
+        err_current.lat = y_err * cos(desired_state_local.hdg) - x_err * sin(desired_state_local.hdg);
+        err_current.lng = -y_err * sin(desired_state_local.hdg) - x_err * cos(desired_state_local.hdg);
         err_t.push_back(err_current);
 
         // Compute control

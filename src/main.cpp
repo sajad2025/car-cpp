@@ -1,19 +1,19 @@
 #include "vehicle_model.h"
 #include "control.h"
 #include "utils.h"
+#include "wpts.h"
 #include <iostream>
 #include <string>
-#include <tuple>
 
 using namespace std;
 
 int main() {
     EgoConfig ego_config;
-    ego_config.duration = 15.0;
+    ego_config.duration = 20.0;
     
     State start_state;
     start_state.x = 0;
-    start_state.y = 5;
+    start_state.y = 0;
     start_state.hdg = 0;
     start_state.vel = 0;
     
