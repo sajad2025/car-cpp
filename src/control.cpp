@@ -38,8 +38,9 @@ Trajectory closedLoopControl(const State& start_state, const State& desired_stat
     double time_current = 0.0;  // Initialize time to 0
 
     // LQR Controller parameters
-    double k1 = 0.44;
-    double k2 = 1.04;
+    double k1 = 0.1000;
+    double k2 = 3.2896;
+    double k3 = 1.6016;
 
     // Reference steering angle, assume zero curvature
     double steer_ref = 0;
@@ -57,7 +58,7 @@ Trajectory closedLoopControl(const State& start_state, const State& desired_stat
     while (abs(err_current.lng) > 1.0 && time_current < config.duration) {
 
         // test update reference, modify desired state
-        if (time_current > 10 && !ref_mod) {
+        if (time_current > 5 && !ref_mod) {
             ref_mod = true; // only modify reference once
 
             double shift_lat = 4;               // shift in lateral direction by 4m
@@ -75,11 +76,13 @@ Trajectory closedLoopControl(const State& start_state, const State& desired_stat
         err_current.hdg = state_current.hdg - desired_state_local.hdg;
         err_current.lat = y_err * cos(desired_state_local.hdg) - x_err * sin(desired_state_local.hdg);
         err_current.lng = -y_err * sin(desired_state_local.hdg) - x_err * cos(desired_state_local.hdg);
+        err_current.steer = state_current.steer - steer_ref;
         err_t.push_back(err_current);
 
-        // Compute control
-        ctrl_current.steer = -config.wheelbsae * (k1 * err_current.lat + k2 * err_current.hdg) * cos(steer_ref) * cos(steer_ref);
-        ctrl_current.steer = max(min(ctrl_current.steer, config.steer_max), config.steer_min);
+        // Compute control, assume steer_rate_ref is zero, u = -Kx = steer_rate - steer_rate_ref
+        ctrl_current.steer_rate = -(k1 * err_current.lat + k2 * err_current.hdg + k3 * err_current.steer);
+        ctrl_current.steer_rate = max(min(ctrl_current.steer_rate, config.steer_rate_max), config.steer_rate_min);
+
         ctrl_current.acc = sign(err_current.lng)? config.acc_max : config.acc_min;
         control_t.push_back(ctrl_current);
 

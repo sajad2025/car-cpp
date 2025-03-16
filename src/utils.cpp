@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cmath>
 
-// Helper function to format a number with exactly 4 digits total
+// Helper function to format a number with exactly 6 digits total
 string FormatWithFixedDigits(double value) {
     stringstream ss;
     ss << fixed;
@@ -15,8 +15,8 @@ string FormatWithFixedDigits(double value) {
     int digitsBeforeDecimal = (integerPart == 0) ? 1 : static_cast<int>(log10(integerPart)) + 1;
     if (value < 0) digitsBeforeDecimal++; // Account for negative sign
     
-    // Set precision to have exactly 4 digits total
-    int precision = max(0, 4 - digitsBeforeDecimal);
+    // Set precision to have exactly 6 digits total
+    int precision = max(0, 6 - digitsBeforeDecimal);
     ss << setprecision(precision) << value;
     
     return ss.str();
@@ -41,14 +41,16 @@ void printTrajectory(const vector<State>& trajectory,
          << setw(colWidth) << "x:" 
          << setw(colWidth) << "y:" 
          << setw(colWidth) << "hdg:" 
+         << setw(colWidth) << "str:" 
          << setw(colWidth) << "vel:" 
+         << setw(colWidth) << "str_dot:"
          << setw(colWidth) << "acc:" 
-         << setw(colWidth) << "steer:" 
-         << setw(colWidth) << "lat:" 
-         << setw(colWidth) << "lng:" 
-         << setw(colWidth) << "hdg_err:" << endl;
+         << setw(colWidth) << "lat_err:" 
+         << setw(colWidth) << "lng_err:" 
+         << setw(colWidth) << "hdg_err:" 
+         << setw(colWidth) << "str_err:" << endl;
     
-    cout << string(colWidth * 10 - 3, '-') << endl;  // Separator line adjusted for new width
+    cout << string(colWidth * 12 - 3, '-') << endl;  // Separator line adjusted for new width
     
     // Print each step in a single line
     for (size_t i = 0; i < trajectory.size(); ++i) {
@@ -63,12 +65,14 @@ void printTrajectory(const vector<State>& trajectory,
              << setw(colWidth) << state.x 
              << setw(colWidth) << state.y 
              << setw(colWidth) << state.hdg 
+             << setw(colWidth) << state.steer
              << setw(colWidth) << state.vel 
+             << setw(colWidth) << control.steer_rate
              << setw(colWidth) << control.acc 
-             << setw(colWidth) << control.steer 
              << setw(colWidth) << error.lat 
              << setw(colWidth) << error.lng 
-             << setw(colWidth) << error.hdg << endl;
+             << setw(colWidth) << error.hdg
+             << setw(colWidth) << error.steer << endl;
     }
 }
 
@@ -99,12 +103,14 @@ void saveTrajectoryToFile(const vector<State>& trajectory,
             << setw(colWidth) << "x"
             << setw(colWidth) << "y"
             << setw(colWidth) << "hdg"
+            << setw(colWidth) << "str"
             << setw(colWidth) << "vel"
+            << setw(colWidth) << "str_dot"
             << setw(colWidth) << "acc"
-            << setw(colWidth) << "steer"
             << setw(colWidth) << "lat_err"
             << setw(colWidth) << "lng_err"
-            << setw(colWidth) << "hdg_err" << endl;
+            << setw(colWidth) << "hdg_err"
+            << setw(colWidth) << "str_err" << endl;
     
     // Write data with consistent column widths and fixed 4 digits total
     for (size_t i = 0; i < trajectory.size(); ++i) {
@@ -123,16 +129,18 @@ void saveTrajectoryToFile(const vector<State>& trajectory,
         outFile << setw(colWidth) << FormatWithFixedDigits(state.x)
                 << setw(colWidth) << FormatWithFixedDigits(state.y)
                 << setw(colWidth) << FormatWithFixedDigits(state.hdg)
+                << setw(colWidth) << FormatWithFixedDigits(state.steer)
                 << setw(colWidth) << FormatWithFixedDigits(state.vel);
         
         // Format control values
-        outFile << setw(colWidth) << FormatWithFixedDigits(control.acc)
-                << setw(colWidth) << FormatWithFixedDigits(control.steer);
+        outFile << setw(colWidth) << FormatWithFixedDigits(control.steer_rate)
+                << setw(colWidth) << FormatWithFixedDigits(control.acc);
         
         // Format error values
         outFile << setw(colWidth) << FormatWithFixedDigits(error.lat)
                 << setw(colWidth) << FormatWithFixedDigits(error.lng)
-                << setw(colWidth) << FormatWithFixedDigits(error.hdg) << endl;
+                << setw(colWidth) << FormatWithFixedDigits(error.hdg)
+                << setw(colWidth) << FormatWithFixedDigits(error.steer) << endl;
     }
     
     outFile.close();

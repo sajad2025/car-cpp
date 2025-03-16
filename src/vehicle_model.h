@@ -12,25 +12,28 @@ struct State {
     double x;
     double y;
     double hdg;
+    double steer;
     double vel;
-    State(double x=0, double y=0, double hdg=0, double vel=0) : x(x), y(y), hdg(hdg), vel(vel) {}
+    State(double x=0, double y=0, double hdg=0, double steer=0, double vel=0) : x(x), y(y), hdg(hdg), steer(steer), vel(vel) {}
 };
 
 struct Control {
     double acc;
-    double steer;
-    Control(double acc=0, double steer=0) : acc(acc), steer(steer) {}
+    double steer_rate;
+    Control(double acc=0, double steer_rate=0) : acc(acc), steer_rate(steer_rate) {}
 };
 
 struct EgoConfig {
     double wheelbsae = 2.7;
-    double velocity_max = 3;
-    double velocity_min = -3;
-    double acc_max = 2;
-    double acc_min = -2;
-    double steer_max = 0.5;
-    double steer_min = -0.5;
-    double dt = 0.1;
+    double velocity_max = 30; // m/s
+    double velocity_min = -3; // m/s
+    double acc_max = 4; // m/s^2
+    double acc_min = -4; // m/s^2
+    double steer_max = 0.5; // rad
+    double steer_min = -0.5; // rad
+    double steer_rate_max = 0.5; // rad/s
+    double steer_rate_min = -0.5; // rad/s
+    double dt = 0.01; // s
     double duration = 20.0; // sim
 };
 
@@ -38,7 +41,8 @@ struct TrackingError {
     double lat;
     double lng;
     double hdg;
-    TrackingError(double lat=0, double lng=0, double hdg=0) : lat(lat), lng(lng), hdg(hdg) {}
+    double steer;
+    TrackingError(double lat=0, double lng=0, double hdg=0, double steer=0) : lat(lat), lng(lng), hdg(hdg), steer(steer) {}
 };
 
 struct Trajectory {

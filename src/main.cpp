@@ -8,20 +8,23 @@
 using namespace std;
 
 int main() {
+    // Only set the values we want to modify, rest will use defaults
     EgoConfig ego_config;
-    ego_config.duration = 20.0;
+    ego_config.duration = 30.0;  // Only setting duration as needed
+    ego_config.dt = 0.01;
+    ego_config.velocity_max = 10;
     
     State start_state;
     start_state.x = 0;
     start_state.y = 0;
     start_state.hdg = 0;
-    start_state.vel = 0;
+    start_state.vel = ego_config.velocity_max;
     
     State end_state;
-    end_state.x = 100;
+    end_state.x = 1000;
     end_state.y = 0;
     end_state.hdg = 0;
-    end_state.vel = 0;
+    end_state.vel = ego_config.velocity_max;
 
     //vector<Control> control_vec = openLoopControl();
     //vector<State> trajectory = trajectoryRollout(start_state, control_vec, ego_config);

@@ -10,12 +10,16 @@ State nextState(const State& current_state, const Control& control, const EgoCon
     next_state.vel = current_state.vel + control.acc * config.dt;
     next_state.vel = max(next_state.vel, config.velocity_min);
     next_state.vel = min(next_state.vel, config.velocity_max);
+
+    next_state.steer = current_state.steer + control.steer_rate * config.dt;
+    next_state.steer = max(next_state.steer, config.steer_min);
+    next_state.steer = min(next_state.steer, config.steer_max);
     
-    next_state.hdg = current_state.hdg + current_state.vel * tan(control.steer) * config.dt / config.wheelbsae;
+    next_state.hdg = current_state.hdg + next_state.vel * tan(next_state.steer) * config.dt / config.wheelbsae;
     next_state.hdg = fmod(next_state.hdg + M_PI, 2 * M_PI) - M_PI;
     
-    next_state.x = current_state.x + current_state.vel * cos(current_state.hdg) * config.dt;
-    next_state.y = current_state.y + current_state.vel * sin(current_state.hdg) * config.dt;
+    next_state.x = current_state.x + next_state.vel * cos(next_state.hdg) * config.dt;
+    next_state.y = current_state.y + next_state.vel * sin(next_state.hdg) * config.dt;
     
     return next_state;
 }
