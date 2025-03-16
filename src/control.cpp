@@ -2,7 +2,6 @@
 #include "vehicle_model.h"
 #include "utils.h"
 #include <cmath>
-#include <tuple>
 using namespace std;
 
 vector<Control> openLoopControl() {

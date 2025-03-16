@@ -9,7 +9,8 @@ TARGET = $(BUILD_DIR)/car_sim
 SRCS = $(SRC_DIR)/main.cpp \
        $(SRC_DIR)/vehicle_model.cpp \
        $(SRC_DIR)/control.cpp \
-       $(SRC_DIR)/utils.cpp
+       $(SRC_DIR)/utils.cpp \
+       $(SRC_DIR)/wpts.cpp
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)

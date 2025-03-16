@@ -4,7 +4,8 @@
 #include "vehicle_model.h"
 #include <string>
 #include <vector>
-#include <tuple>
+
+using namespace std;
 
 template <typename T>
 T sign(T val) {
@@ -12,16 +13,16 @@ T sign(T val) {
 }
 
 // Function to print trajectory with all data to console
-void printTrajectory(const std::vector<State>& trajectory, 
-                    const std::vector<Control>& controls,
-                    const std::vector<TrackingError>& errors,
-                    const std::vector<double>& time_vec);
+void printTrajectory(const vector<State>& trajectory, 
+                    const vector<Control>& controls,
+                    const vector<TrackingError>& errors,
+                    const vector<double>& time_vec);
 
 // Function to save trajectory with all data to a text file
-void saveTrajectoryToFile(const std::vector<State>& trajectory, 
-                         const std::vector<Control>& controls,
-                         const std::vector<TrackingError>& errors,
-                         const std::vector<double>& time_vec,
-                         const std::string& filename);
+void saveTrajectoryToFile(const vector<State>& trajectory, 
+                         const vector<Control>& controls,
+                         const vector<TrackingError>& errors,
+                         const vector<double>& time_vec,
+                         const string& filename);
 
 #endif // UTILS_H

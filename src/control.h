@@ -6,5 +6,6 @@
 
 std::vector<Control> openLoopControl();
 Trajectory closedLoopControl(const State&, const State&, const EgoConfig&);
+Trajectory genWpts(const EgoConfig&);
 
 #endif // CONTROL_H 

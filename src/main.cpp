@@ -9,7 +9,7 @@ using namespace std;
 
 int main() {
     EgoConfig ego_config;
-    ego_config.duration = 10.0;
+    ego_config.duration = 15.0;
     
     State start_state;
     start_state.x = 0;
@@ -39,6 +39,16 @@ int main() {
     // Save trajectory to a file in the docs folder
     string outputFilename = "docs/trajectory.txt";
     saveTrajectoryToFile(state_t, control_t, err_t, time_vec, outputFilename);
+
+    // generate waypoints
+    Trajectory wpts = genWpts(ego_config);
+    vector<State> wpts_state = wpts.states;
+    vector<Control> wpts_ctrl = wpts.controls;
+    vector<TrackingError> wpts_err = wpts.tracking_errors;
+    vector<double> wpts_time = wpts.time_vec;
+    
+    string wptsFilename = "docs/wpts.txt";
+    saveTrajectoryToFile(wpts_state, wpts_ctrl, wpts_err, wpts_time, wptsFilename);
     
     return 0;
 }

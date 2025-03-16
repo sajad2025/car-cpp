@@ -46,6 +46,7 @@ def plot_trajectory(data, output_dir=None):
     ax1.set_xlabel('X Position (m)')
     ax1.set_ylabel('Y Position (m)')
     ax1.grid(True)
+    ax1.set_aspect('equal')
     
     # Plot 2: Velocity vs Time - 2nd row, 1st column
     ax2 = fig.add_subplot(3, 2, 3)

@@ -5,8 +5,6 @@
 #include <sstream>
 #include <cmath>
 
-using namespace std;
-
 // Helper function to format a number with exactly 4 digits total
 string FormatWithFixedDigits(double value) {
     stringstream ss;
